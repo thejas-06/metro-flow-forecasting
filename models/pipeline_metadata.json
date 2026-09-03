@@ -1,0 +1,34 @@
+{
+  "pipeline_name": "namma_metro_passenger_flow_pipeline",
+  "version": "2.1.0",
+  "trained_at": "2026-08-25T09:47:55.251322",
+  "model_type": "XGBRegressor",
+  "feature_count": 19,
+  "features": [
+    "Hour",
+    "Hour_Sin",
+    "Hour_Cos",
+    "DayOfWeek",
+    "Day_Sin",
+    "Day_Cos",
+    "DayOfMonth",
+    "WeekOfYear",
+    "Is_Weekend",
+    "Is_Morning_Peak",
+    "Is_Evening_Peak",
+    "Is_Peak_Hour",
+    "Exit_Count",
+    "Lag_1h",
+    "Lag_2h",
+    "Lag_24h",
+    "Rolling_3h",
+    "Rolling_3h_Std",
+    "Station_AvgTraffic"
+  ],
+  "evaluation_metrics": {
+    "r2_score": 0.9955,
+    "rmse": 32.01,
+    "mae": 14.56,
+    "wmape_pct": 4.08
+  }
+}
