@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Namma Metro | Know Before You Go</title>
+  <meta name="description" content="Check crowd levels at any Namma Metro station in Bengaluru before you travel.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/static/css/layout.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a class="brand" href="/">
+        <span class="brand-icon">🚇</span>
+        <span class="brand-name">Namma Metro</span>
+      </a>
+      <nav class="nav-tabs" id="nav-tabs">
+        <button class="nav-tab active" data-tab="check-view">Check Crowd</button>
+        <button class="nav-tab" data-tab="plan-view">Plan My Day</button>
+        <button class="nav-tab" data-tab="stations-view">All Stations</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- TAB 1: Check Crowd                                            -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section id="check-view" class="view active">
+      <div class="section-center">
+        <!-- Hero -->
+        <div class="hero-block">
+          <h1>How crowded is your station?</h1>
+          <p>Pick a station, date and time — we'll predict the crowd level so you can plan your journey.</p>
+        </div>
+
+        <!-- Input Bar -->
+        <form id="check-form" class="input-bar card">
+          <div class="input-group grow">
+            <label for="ck-station">Station</label>
+            <select id="ck-station" class="field" required>
+              <option value="" disabled selected>Choose station…</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="ck-date">Date</label>
+            <input type="date" id="ck-date" class="field" min="2020-01-01" max="2027-12-31" required>
+          </div>
+          <div class="input-group">
+            <label for="ck-hour">Time</label>
+            <div class="time-picker">
+              <select id="ck-hour" class="field">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" id="btn-check">Check</button>
+        </form>
+
+        <!-- Result (shown after prediction loads) -->
+        <div id="check-result" class="result-card card hidden">
+          <!-- Status Banner -->
+          <div class="status-banner" id="status-banner">
+            <span class="status-emoji" id="r-emoji">✅</span>
+            <div class="status-text-block">
+              <h2 id="r-headline">Not Crowded</h2>
+              <p id="r-advice">Good time to travel. Expect a smooth journey.</p>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-box">
+              <span class="stat-label">Expected Passengers</span>
+              <span class="stat-num" id="r-pax">0</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Station Average</span>
+              <span class="stat-num dim" id="r-avg">0 / hr</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Day</span>
+              <span class="stat-num dim" id="r-day">Weekday</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Confidence Range</span>
+              <span class="stat-num dim" id="r-range">0 – 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- TAB 2: Plan My Day                                            -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section id="plan-view" class="view">
+      <div class="section-center">
+        <div class="hero-block small">
+          <h1>Plan your day at any station</h1>
+          <p>See the expected crowd across all 24 hours so you can plan when to travel or allocate staff.</p>
+        </div>
+
+        <form id="plan-form" class="input-bar card">
+          <div class="input-group grow">
+            <label for="pl-station">Station</label>
+            <select id="pl-station" class="field" required>
+              <option value="" disabled selected>Choose station…</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="pl-date">Date</label>
+            <input type="date" id="pl-date" class="field" min="2020-01-01" max="2027-12-31" required>
+          </div>
+          <button type="submit" class="btn-primary" id="btn-plan">
+            <span class="btn-label">Show Full Day</span>
+          </button>
+        </form>
+
+        <!-- KPIs -->
+        <div class="kpi-row" id="plan-kpis">
+          <div class="kpi card">
+            <span class="kpi-label">Total Passengers</span>
+            <span class="kpi-value" id="kpi-total">—</span>
+            <span class="kpi-sub" id="kpi-dayname"></span>
+          </div>
+          <div class="kpi card">
+            <span class="kpi-label">Busiest Hour</span>
+            <span class="kpi-value accent-warm" id="kpi-peak-time">—</span>
+            <span class="kpi-sub" id="kpi-peak-count"></span>
+          </div>
+          <div class="kpi card">
+            <span class="kpi-label">Avg per Hour</span>
+            <span class="kpi-value" id="kpi-avg">—</span>
+          </div>
+          <div class="kpi card">
+            <span class="kpi-label">Station Type</span>
+            <span class="kpi-value accent-cool" id="kpi-tier">—</span>
+            <span class="kpi-sub" id="kpi-stn-name"></span>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-block card">
+          <div class="chart-top">
+            <h3>Hourly Passenger Flow</h3>
+            <div class="chart-legend">
+              <span class="dot blue"></span> Normal
+              <span class="dot amber"></span> Rush Hour
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="forecastChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-block card">
+          <h3>Hour-by-Hour Breakdown</h3>
+          <div class="table-scroll">
+            <table id="plan-table">
+              <thead>
+                <tr><th>Time</th><th>Boarding</th><th>Exiting</th><th>Crowd Level</th></tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="4" class="empty-row">Select a station above</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- TAB 3: All Stations                                           -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <section id="stations-view" class="view">
+      <div class="section-center">
+        <!-- Crazy Feature: Network Pulse Indicator -->
+        <div class="network-pulse-card card" id="network-pulse">
+          <div class="pulse-header">
+            <div class="pulse-indicator">
+              <span class="pulse-ping"></span>
+              <span class="pulse-core"></span>
+            </div>
+            <div class="pulse-meta">
+              <div class="pulse-title" id="np-title">Network Operating Normally</div>
+              <div class="pulse-subtitle" id="np-subtitle">Real-time system load is within optimal capacity</div>
+            </div>
+          </div>
+          <div class="pulse-stats-grid">
+            <div class="p-stat-item">
+              <span class="p-stat-lbl">Active Stations</span>
+              <span class="p-stat-num" id="np-station-count">83 Stations</span>
+            </div>
+            <div class="p-stat-item">
+              <span class="p-stat-lbl">Network Peak Hub</span>
+              <span class="p-stat-num accent-warm" id="np-top-hub">Majestic</span>
+            </div>
+            <div class="p-stat-item">
+              <span class="p-stat-lbl">System Rush Hours</span>
+              <span class="p-stat-num" id="np-rush-hours">8:00 – 10:00 AM · 5:00 – 8:00 PM</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stations-top card">
+          <div>
+            <h2>Network Stations</h2>
+            <p>Select any station for instant 24-hour demand curves and rush hours.</p>
+          </div>
+          <div class="stations-controls">
+            <select id="station-sort" class="field sort-field" aria-label="Sort stations">
+              <option value="traffic-desc">🔥 Busiest First (High Traffic)</option>
+              <option value="traffic-asc">🌱 Quiet Stations First</option>
+              <option value="name-asc">🔤 Alphabetical (A – Z)</option>
+            </select>
+            <input type="text" id="station-search" class="field search-field" placeholder="Search 83 stations…">
+          </div>
+        </div>
+        <div class="station-grid" id="station-grid"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Station Drill-Down Modal -->
+  <div id="station-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-content card">
+      <div class="modal-header">
+        <div>
+          <span class="modal-badge" id="m-tier">Commercial Hub</span>
+          <h2 id="m-name">Nadaprabhu Kempegowda Station, Majestic</h2>
+        </div>
+        <button class="modal-close" id="btn-modal-close" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Modal Live Status -->
+        <div class="modal-status-box" id="m-status-box">
+          <span class="modal-emoji" id="m-emoji">✅</span>
+          <div>
+            <h3 id="m-headline">Expected Normal Flow</h3>
+            <p id="m-subtext">Peak rush expected around 06:00 PM</p>
+          </div>
+        </div>
+
+        <!-- Modal Quick KPIs -->
+        <div class="modal-kpis">
+          <div class="m-kpi">
+            <span class="m-kpi-label">Avg Traffic</span>
+            <span class="m-kpi-val" id="m-avg">—</span>
+          </div>
+          <div class="m-kpi">
+            <span class="m-kpi-label">Busiest Hour</span>
+            <span class="m-kpi-val accent-warm" id="m-peak">—</span>
+          </div>
+          <div class="m-kpi">
+            <span class="m-kpi-label">Est. Daily Volume</span>
+            <span class="m-kpi-val" id="m-daily">—</span>
+          </div>
+        </div>
+
+        <!-- Modal Mini Chart -->
+        <div class="modal-chart-wrap">
+          <div class="m-chart-title">24-Hour Passenger Trend</div>
+          <div class="m-chart-container">
+            <canvas id="modalForecastChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-primary" id="btn-modal-check">Open in Crowd Checker →</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>Namma Metro · Bengaluru Transit Intelligence</p>
+  </footer>
+
+  <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
